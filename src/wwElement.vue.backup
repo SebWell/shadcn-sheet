@@ -16,52 +16,52 @@
       :class="cn(
         'fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out',
         // Side positioning
-        side === 'top' ? 'inset-x-0 top-0 border-b' : '',
-        side === 'bottom' ? 'inset-x-0 bottom-0 border-t' : '',
-        side === 'left' ? 'inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm' : '',
-        side === 'right' ? 'inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm' : '',
+        content.side === 'top' ? 'inset-x-0 top-0 border-b' : '',
+        content.side === 'bottom' ? 'inset-x-0 bottom-0 border-t' : '',
+        content.side === 'left' ? 'inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm' : '',
+        content.side === 'right' ? 'inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm' : '',
         // Animation classes
-        side === 'top' ? 'data-[state=open]:slide-in-from-top data-[state=closed]:slide-out-to-top' : '',
-        side === 'bottom' ? 'data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom' : '',
-        side === 'left' ? 'data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left' : '',
-        side === 'right' ? 'data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right' : '',
-        customClass
+        content.side === 'top' ? 'data-[state=open]:slide-in-from-top data-[state=closed]:slide-out-to-top' : '',
+        content.side === 'bottom' ? 'data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom' : '',
+        content.side === 'left' ? 'data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left' : '',
+        content.side === 'right' ? 'data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right' : '',
+        content.customClass
       )"
-      :style="customStyle"
+      :style="content.customStyle"
       role="dialog"
-      :aria-labelledby="title ? 'sheet-title' : undefined"
-      :aria-describedby="description ? 'sheet-description' : undefined"
+      :aria-labelledby="content.title ? 'sheet-title' : undefined"
+      :aria-describedby="content.description ? 'sheet-description' : undefined"
       @keydown="handleKeyDown"
       tabindex="-1"
     >
       <!-- Header -->
-      <div v-if="showHeader !== false" class="flex flex-col space-y-1.5 text-center sm:text-left">
+      <div v-if="content.showHeader !== false" class="flex flex-col space-y-1.5 text-center sm:text-left">
         <div class="flex items-center justify-between">
           <div class="space-y-1">
             <h2
-              v-if="title"
+              v-if="content.title"
               id="sheet-title"
               class="text-lg font-semibold leading-none tracking-tight"
             >
-              {{ title }}
+              {{ content.title }}
             </h2>
             <p
-              v-if="description"
+              v-if="content.description"
               id="sheet-description"
               class="text-sm text-muted-foreground"
             >
-              {{ description }}
+              {{ content.description }}
             </p>
           </div>
           
           <!-- Close button -->
           <button
-            v-if="showClose !== false"
+            v-if="content.showClose !== false"
             @click="closeSheet"
             :class="cn(
               'absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none'
             )"
-            :aria-label="closeLabel || 'Close'"
+            :aria-label="content.closeLabel || 'Close'"
           >
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -74,16 +74,16 @@
       <div 
         :class="cn(
           'flex-1 overflow-auto',
-          contentClass
+          content.contentClass
         )"
       >
         <!-- Custom content slot -->
-        <div v-if="content" v-html="content" />
+        <div v-if="content.content" v-html="content.content" />
         
         <!-- Form content -->
-        <div v-if="fields && fields.length > 0" class="space-y-4">
+        <div v-if="content.fields && content.fields.length > 0" class="space-y-4">
           <div
-            v-for="(field, index) in fields"
+            v-for="(field, index) in content.fields"
             :key="field.id || index"
             class="space-y-2"
           >
@@ -172,14 +172,14 @@
 
       <!-- Footer with actions -->
       <div
-        v-if="showFooter !== false && (actions && actions.length > 0)"
+        v-if="content.showFooter !== false && (content.actions && content.actions.length > 0)"
         :class="cn(
           'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2',
-          footerClass
+          content.footerClass
         )"
       >
         <button
-          v-for="(action, index) in actions"
+          v-for="(action, index) in content.actions"
           :key="action.id || index"
           @click="handleAction(action)"
           :disabled="action.disabled"
@@ -252,13 +252,13 @@ export default {
     }
 
     const handleBackdropClick = () => {
-      if (props.closeOnBackdrop !== false) {
+      if (props.content.closeOnBackdrop !== false) {
         closeSheet()
       }
     }
 
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape' && props.closeOnEscape !== false) {
+      if (event.key === 'Escape' && props.content.closeOnEscape !== false) {
         event.preventDefault()
         closeSheet()
       }
@@ -267,8 +267,8 @@ export default {
     const handleAction = (action) => {
       // Emit action event with form data if available
       const formData = {}
-      if (props.fields) {
-        props.fields.forEach((field, index) => {
+      if (props.content.fields) {
+        props.content.fields.forEach((field, index) => {
           formData[field.id || `field_${index}`] = field.value
         })
       }
@@ -276,7 +276,7 @@ export default {
       emit('action-click', {
         action,
         formData,
-        fields: props.fields
+        fields: props.content.fields
       })
 
       // Close sheet if action specifies it
@@ -287,7 +287,7 @@ export default {
 
     // Handle clicks outside when sheet is open
     const handleClickOutside = (event) => {
-      if (isOpen.value && props.closeOnBackdrop !== false) {
+      if (isOpen.value && props.content.closeOnBackdrop !== false) {
         const sheetElement = document.querySelector('[role="dialog"]')
         if (sheetElement && !sheetElement.contains(event.target)) {
           closeSheet()
